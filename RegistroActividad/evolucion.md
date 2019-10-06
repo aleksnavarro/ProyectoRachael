@@ -15,3 +15,15 @@ Se hizo la prueba con `eyetracker.cpp` y finalmente la ventana con la imagen en 
 Por los resultados mostrados en la terminal se toman demasiados datos a la vez, un objetivo es corregir a una muestra de datos aceptable para evitar posible ruido o torpezas durante la captura.
 
 Falta por lo tanto documentar correctamente usando los comentarios, identar el código y hacerlo más fluido a la vista.
+
+## 06 de octubre 2019
+Se creo el repositorio en GitHub llamado [Proyecto Rachael](https://github.com/aleksnavarro/ProyectoRachael) para tener un control del proyecto. Se continuo modificando el código en `eyetracker.cpp`, en el cuál se incluyeron la opción de poder elegir el index de la cámara conectada, se corrigió que el ratón estuviera estático y además dentro de la función se calculo la mitad de la pantalla, punto de partida del cursor. También se añadió la posibilidad de guardar un archivo `.csv` con la etiqueta de tiempo y las coordenadas de la posición del puntero.
+
+Entre los problemas a resolver es la posición del puntero, el cuál no llega a los extremos de la pantalla. Para esto se me ocurren tres soluciones posibles:
+* Exagerar la posición del puntero usando un factor con el cuál multiplicar la posición.
+* Subir la cantidad de cuadros por segundo que toma el programa en relación con la cámara.
+* Tomar una x cantidad de cuadros por segundo e interpretarlo como fotografías.
+
+Una vez resuelto el problema de la posición del puntero, podemos pasar a análisis y filtrado de datos y además de la calibración.
+
+Finalmente, hace falta limpiar el código y ordenarlo usando librerías o invocando archivos de código.

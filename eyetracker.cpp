@@ -1,12 +1,14 @@
+//compilar con g++ <archivo.cpp> -o <archivo.out> `pkg-config --cflags --libs opencv x11`
+
 #include <iostream>
+#include <fstream>
+#include <ctime>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
-
-using namespace cv;
-using namespace std;
+#include <X11/Xlib.h>
 
 cv::Vec3f getEyeball(cv::Mat &eye, std::vector<cv::Vec3f> &circles)
 {
@@ -127,18 +129,32 @@ void detectEyes(cv::Mat &frame, cv::CascadeClassifier &faceCascade, cv::CascadeC
   cv::imshow("Eye", eye);
 }
 
-void changeMouse(cv::Mat &frame, cv::Point &location)
+void changeMouse(cv::Mat &frame, cv::Point &location, std::ofstream &prueba)
 {
+  time_t now = time(0);
+  tm *ltm = localtime(&now);
   std::cerr << "Flag changeMouse." << std::endl;
   if (location.x > frame.cols) location.x = frame.cols;
   if (location.x < 0) location.x = 0;
   if (location.y > frame.rows) location.y = frame.rows;
   if (location.y < 0) location.y = 0;
   system(("xdotool mousemove " + std::to_string(location.x) + " " + std::to_string(location.y)).c_str());
+  std::cout << location.x << "," << location.y << std::endl;
+  prueba << 1 + ltm->tm_hour << ":" << 1 + ltm->tm_min << ":" << 1 + ltm->tm_sec << "," << location.x << "," << location.y << "\n" ;
 }
 
 int main(int argc, char **argv)
 {
+  int idx,width,height;
+
+  Display* disp = XOpenDisplay(NULL);
+    Screen*  scrn = DefaultScreenOfDisplay(disp);
+    width  = scrn->width;
+    height = scrn->height;
+
+  std::cout << "Webcam Index: " ;
+  std::cin >> idx;
+
   if (argc != 2)
   {
       std::cerr << "Usage: EyeDetector <WEBCAM_INDEX>" << std::endl;
@@ -159,23 +175,26 @@ int main(int argc, char **argv)
   }
 
   //cv::VideoCapture cap("./sample.mp4"); // the fist webcam connected to your PC
-  cv::VideoCapture cap(0); // the fist webcam connected to your PC
+  cv::VideoCapture cap(idx); // the fist webcam connected to your PC
   if (!cap.isOpened())
   {
       std::cerr << "Webcam not detected." << std::endl;
       return -1;
   }
   int nbImage=0;
+  cv::Mat frame0;
+  //mousePoint = cv::Point(800, 800);
+  mousePoint = cv::Point(width/2,height/2);
+  std::ofstream prueba;
+  prueba.open ("ejemplo.csv");
   while (true)
   {
-      cv::Mat frame0;
-      mousePoint = cv::Point(800, 800);
       cap >> frame0; // outputs the webcam image to a Mat
       if (!frame0.data) break;
       detectEyes(frame0, faceCascade, eyeCascade);
-      changeMouse(frame0, mousePoint);
+      changeMouse(frame0, mousePoint, prueba);
       cv::imshow("Video0", frame0); // displays the Mat
-      int c = cvWaitKey(40);
+      int c = cvWaitKey(60);
       if (static_cast<char>(c)=='s')
      {
          imwrite(format("image0_%d.jpg",nbImage),frame0);
@@ -184,5 +203,6 @@ int main(int argc, char **argv)
       //exit the loop if user press "Esc" key  (ASCII value of "Esc" is 27)
       if(27 == char(c)) break;
   }
+  prueba.close();
   return 0;
 }
